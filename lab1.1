@@ -1,0 +1,21 @@
+s = "4D3C91C579C2C6216567A5241614B561ADDF76C4BB659E6FE7F65FF76A918C843F0458B3EF457BCD9022D78798A29462EC99C74E6674690267D3E9844251B39D"
+l = len(s)
+x = l % 8
+k = l + 8 - x
+if x == 0 :
+	print(s)
+else:
+	s = s.rjust(k, '0')
+	print(s)
+import textwrap
+list = textwrap.wrap(s, 8)
+print(list)
+
+
+for (index, elem) in enumerate(list):
+    list[index] = int(elem, 16)
+    print(list)
+
+
+list.reverse()
+print(list)
