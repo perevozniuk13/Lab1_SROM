@@ -41,6 +41,15 @@ for index in range(len(listA)):
 >>
 print(listC)
 
+#ADD_TO_HEX
+listC.reverse()
+for (index, elem) in enumerate(listC):
+                  listC[index] = hex(elem)
+C = ''.join(listC)
+print(C)
+
+
+
 #SUBTRACTION
 listC = [ ]
 borrow = 0
@@ -54,3 +63,10 @@ for index in range(len(listA)):
             borrow = 1
 >>
 print(listC)
+
+#SUB_TO_HEX
+listC.reverse()
+for (index, elem) in enumerate(listC):
+                  listC[index] = hex(elem)
+C = ''.join(listC)
+print(C)
