@@ -1,0 +1,452 @@
+#LABA1
+A = "94EDE1A444B9738ADF06CDB40DCAFA87B25A8BECA2D2262A53D8431A119405F0CBEFB83D2AD547CCE3AE74A8EC74A313C8BED20D4349D9EFBA356FE6E8AD89E2"
+B = "5BCC0B222EE17877C9EB60FA91632BC7A6E29D80F02CD3FE16B5C2A2231B43DB2B2D12F21B293AAF49FE1165CB7A21D12D6ACEC225285544B36BABD3F8B4DD8D"
+S = "D4D2110984907B5625309D956521BAB4157B8B1ECE04043249A3D379AC112E5B9AF44E721E148D88A942744CF56A06B92D28A0DB950FE4CED2B41A0BD38BCE7D0BE1055CF5DE38F2A588C2C9A79A75011058C320A7B661C6CE1C36C7D870758307E5D2CF07D9B6E8D529779B6B2910DD17B6766A7EFEE215A98CAC300F2827DB"
+N = "7723A9B9AFFCFCACFEF4537D2C587BA1E07EC2A27B9C907261F6461044DE2FEC26DA9BACDAC77063244D575EE788BB1145D7D09A94EC4B59859669CF8D86F454"
+import textwrap
+def Func(Q):
+    l = len(Q)
+    x = l % 8
+    k = l + 8 - x
+    if x == 0 :
+        listQ = textwrap.wrap(Q, 8)
+        for (index, elem) in enumerate(listQ):
+            listQ[index] = int(elem, 16)
+    else:
+        Q.rjust(k, '0')
+        listQ = textwrap.wrap(Q, 8)
+        for (index, elem) in enumerate(listQ):
+            listQ[index] = int(elem, 16)
+    listQ.reverse()
+    return listQ
+listA = Func(A)
+listB = Func(B)
+print("Число А:")
+print(listA)
+print("Число B:")
+print(listB)
+
+def LongShiftBitsToHigh(V, k):
+    V = V + [0] * k
+    return V
+def LongShiftDigitsToHigh(listV, k):
+    for i in range(k):
+        listV.insert(0, 0)
+    return listV    
+#ADDITION
+def Long_Add(listW, listZ, w):
+    listC = [ ]
+    carry = 0
+    if w == 1:
+        f = len(listW) - len(listZ)
+        LongShiftDigitsToHigh(listZ, f)
+        listW.reverse()
+        listZ.reverse()
+        for index in range(max(len(listW), len(listZ)) + 1):
+            temp = (listW[index] if index<len(listW) else 0) + (listZ[index] if index<len(listZ) else 0) + carry
+            m = temp & ((2 ** w) - 1)
+            listC.insert(index, m)
+            carry = temp >> w
+        listC.reverse()
+    else:
+        for index in range(max(len(listW), len(listZ)) + 1):
+            temp = (listW[index] if index<len(listW) else 0) + (listZ[index] if index<len(listZ) else 0) + carry
+            m = temp & ((2 ** w) - 1)
+            listC.insert(index, m)
+            carry = temp >> w
+    if listC[-1] == 0:
+        del listC[-1]
+    return listC
+print("С = А + В:")
+listC = Long_Add(listA, listB, 32)
+print(listC)
+
+#ADD_TO_HEX
+def To_Hex(listQ):
+    listQ.reverse()
+    for (index, elem) in enumerate(listQ):
+        listQ[index] = hex(elem)[2:]
+    Q = ''.join(listQ)
+    return Q
+C = To_Hex(listC)
+print("С = А + В в системе счисления Хекс:")
+print(C)
+#SUBTRACTION
+def Long_Sub(listW, listZ, w):
+    listC = [ ]
+    borrow = 0
+    if w == 1:
+        f = len(listW) - len(listZ)
+        LongShiftDigitsToHigh(listZ, f)
+        listW.reverse()
+        listZ.reverse()
+        for index in range(len(listW)):
+            temp = listW[index] - listZ[index] - borrow
+            if temp >= 0 :
+                listC.insert(index, temp)
+                borrow = 0
+            else:
+                listC.insert(index, (2 ** w) + temp)
+                borrow = 1
+        listC.reverse() 
+    else:
+        for index in range(min(len(listZ), len(listW))):
+            temp = listW[index] - listZ[index] - borrow
+            if temp >= 0 :
+                listC.insert(index, temp)
+                borrow = 0
+            else:
+                listC.insert(index, (2 ** w) + temp)
+                borrow = 1
+    return listC
+listC = Long_Sub(listA, listB, 32)
+print("С = А - В:")
+print(listC)
+
+#SUB_TO_HEX
+C = To_Hex(listC)
+print("С = А - В в системе счисления Хекс:")
+print(C)
+
+#MULTIPLICATION
+def LongMulOneDigit(listL, b):
+    listC = [ ]
+    carry = 0
+    n = len(listL)
+    for i in range(n):
+        temp = listL[i] * b + carry
+        listC.insert(i, temp & ((2 ** 32) - 1))
+        carry = temp >> 32
+    listC.insert(n, carry)
+    return listC
+def LongShiftDigitsToHigh(listV, k):
+    for i in range(k):
+        listV.insert(0, 0)
+    return listV    
+def Long_Mul(listK, listJ):
+    listD = [ ]
+    for j in range(len(listJ)):
+        f = listJ[j] 
+        temp = LongMulOneDigit(listK, f)
+        LongShiftDigitsToHigh(temp, j)
+        #многоразрядное сложение
+        listD = Long_Add(listD, temp, 32)
+    return listD    
+listD = Long_Mul(listA, listB)
+print("D = A*B: ")
+print(listD)
+
+#MULL_TO_HEX
+D = To_Hex(listD)
+print("D = А*В в системе счисления Хекс:")
+print(D)
+
+
+def To_32_From_Bin(L):
+    h = str(int(''.join(str(e) for e in L), 2))
+    h1 = hex(int(h))[2:]
+    h2 = Func(h1)
+    return h2
+def To_Bin_From_32(S):
+    S.reverse()
+    S = ''.join(str(e) for e in S)
+    S = bin(int(S))[2:]
+    S = [int(digit) for digit in str(S)]
+    return S
+def To_Hex_From_Bin(G):
+    g1 = ''.join(str(e) for e in G)
+    g2 = int(g1, 2)
+    g3 = hex(g2)[2:]
+    return g3
+def To_Bin(S):
+    S = int(bin(int(S, 16))[2:])
+    S = [int(digit) for digit in str(S)]
+    return S    
+
+
+#SQUARE
+def Long_Square(listS):
+    listD = [ ]
+    listD = Long_Mul(listS, listS)
+    return listD
+listD = Long_Square(listA)
+print("A^2: ")
+print(listD)   
+
+#SQUARE_TO_HEX
+D = To_Hex(listD)
+print("A^2 в системе счисления Хекс:")
+print(D)
+
+def Remove_Last_Zeroes(a):
+    for i in range(len(a)):
+        if a[-1] == 0:
+            a.remove(a[-1])
+        else:
+            break
+    return a
+#POWER
+def Long_Power(listE, listR):
+    listR = To_Bin_From_32(listR)
+    listC = [1]
+    i = len(listR) - 1
+    while (i > 0):
+        if (listR[i] == 1):
+            listC = Long_Mul(listC, listE)
+        if (i == 0):
+            listC = Long_Square(listC)
+        i = i - 1
+    Remove_Last_Zeroes(listC)
+    return listC
+a1 = [203, 5432, 4112, 1985, 647]
+b1 = [4569, 8766, 263, 2746]
+listL = Long_Power(a1, b1)
+print("A^B: ")
+print(listL) 
+#POWER_TO_HEX
+L = To_Hex(listL)
+print("A^B в системе счисления Хекс:")
+print(L)
+
+
+#DIV
+def Remove_First_Zeroes(listY):
+    for index in range(len(listY)):
+        if listY[0] == 0:
+            listY.remove(listY[0])
+        else:
+            break
+    return listY     
+def LongShiftBitsToHigh(V, k):
+    V = V + [0] * k
+    return V
+def Degree_Of_Two_Bin(j):
+    k = 2 ** j
+    r = bin(k)[2:]
+    R = [int(digit) for digit in str(r)]
+    return R
+def Long_Compare(listW, listZ):
+    if len(listW) == len(listZ):
+        index = 0
+        while (listW[index] == listZ[index]):
+            index = index + 1
+            if index == len(listW):
+                return 0
+        if listW[index] > listZ[index]:
+            return 1
+        else:
+            return -1
+    else:
+        if len(listW) > len(listZ):
+            return 1
+        else:
+            return -1
+def LongDivMod(T, K):
+    T = To_Bin(T)
+    K = To_Bin(K)
+    k = len(K)
+    R = T[:]
+    Q = [ ]
+    while (Long_Compare(R, K) == 0) or (Long_Compare(R, K) == 1):
+        t = len(R)
+        C = LongShiftBitsToHigh(K, t - k) #заполняем нулями так чтобы T = K
+        if Long_Compare(R, C) == -1: #если C получилось больше R
+            t = t - 1                #возвращаемся на бит назад
+            C = LongShiftBitsToHigh(K, t - k)
+        R = Long_Sub(R, C, 1)
+        Remove_First_Zeroes(R)
+        D = Degree_Of_Two_Bin(t - k)
+        #многоразрядное сложение
+        Q = Long_Add(Q, D, 1) #заполняем Q
+        Remove_First_Zeroes(Q)
+    return Q, R
+Q, R = LongDivMod(A, B)
+print("Частное от A/B:")
+print(Q)
+print("Частное от A/B в системе счисления Хекс:")
+I = To_Hex_From_Bin(Q)
+print(I)
+print("Остаток от деления A на В:")
+print(R)
+print("Остаток от деления A на В в системе счисления Хекс:")
+J = To_Hex_From_Bin(R)
+print(J)
+
+#LABA2:
+#NSD
+def Kill_Last_Digits(x, k):
+    for index in range(k):
+        del x[-1]
+    return x
+def Even_Odd_Check(F):
+    if F[-1] == 0:
+        return 1
+    else:
+        return 0
+def Zero_Check(listQ):
+    q = int(str(int(''.join(str(e) for e in listQ), 2)))
+    if  q == 0:
+        return 1
+    else:
+        return 0
+def NSD(A, B):
+    A = To_Bin(A)
+    B = To_Bin(B)
+    D = [1]
+    while (Even_Odd_Check(A) == 1 and Even_Odd_Check(B) == 1):
+        A = Kill_Last_Digits(A, 1)
+        B = Kill_Last_Digits(B, 1)
+        D = LongShiftBitsToHigh(D, 1)
+    while Even_Odd_Check(A) == 1:
+        A = Kill_Last_Digits(A, 1)
+    while Zero_Check(B) == 0:
+        while Even_Odd_Check(B) == 1:
+            B = Kill_Last_Digits(B, 1)
+        A = (A if Long_Compare(A, B) == -1 else B)
+        B = (Long_Sub(A, B, 1) if Long_Compare(A, B) == 1 else Long_Sub(B, A, 1))
+    return D
+print("НОД чисел A И B:")
+print(NSD(A, B))  
+print("НОД чисел A И B в системе счисления Хекс:")
+print(To_Hex_From_Bin(NSD(A, B)))
+
+#NSK
+def NSK(A, B):
+    A1 = Func(A)
+    B1 = Func(B)
+    C = Long_Mul(A1, B1)
+    C1 = To_Hex(C)
+    J = To_Hex_From_Bin(NSD(A, B)) 
+    N = LongDivMod(C1, J)
+    return N
+print("НОК чисел A И B:")
+print(NSK(A, B))  
+#print("НОК чисел A И B в системе счисления Хекс:")
+#print(To_Hex_From_Bin(NSK(A, B)))
+
+def To_32_From_Bin(L):
+    h = str(int(''.join(str(e) for e in L), 2))
+    h1 = hex(int(h))[2:]
+    h2 = Func(h1)
+    return h2
+    
+#Barret_Reduction
+def Kill_Last_Digits(x, l):
+    k = len(x)
+    y = x[:(k - l)]
+    return y
+def Long_Compare_32(X, Y):
+    X = To_Bin_From_32(X)
+    Y = To_Bin_From_32(Y)
+    C = Long_Compare(X, Y)
+    return C
+def Value_Of_M(listK):
+    k = len(listK)
+    d = (2 ** 32) ** (2 * k) #бэта
+    d1 = hex(d)[2:]
+    h = To_Hex(listK)
+    M, R = LongDivMod(d1, h) #M-целая часть от деления
+    M1 = To_32_From_Bin(M)
+    return M1
+print("Значение Мю:")
+listN = Func(N)
+M = Value_Of_M(listN)
+print(M)
+def Barret_Reduction(x, n):
+    x = Func(x)
+    n = Func(n)
+    k = len(n)
+    x.reverse()
+    Q = Kill_Last_Digits(x, k - 1)
+    Q.reverse()
+    #M - мю
+    Q = Long_Mul(Q, M)
+    Q.reverse()
+    Q = Kill_Last_Digits(Q, k + 1)
+    Q.reverse()
+    E = Kill_Last_Digits(x, len(x) - k - 1)
+    Q1 = Long_Mul(Q, n)
+    E1 = Kill_Last_Digits(Q1, len(Q1) - k - 1)
+    R = Long_Sub(E1, x, 32)
+    while (Long_Compare_32(R, n) == 0) or (Long_Compare_32(R, n) == 1):
+        R = Long_Sub(R, n, 32)
+    return R 
+G = Barret_Reduction(A, B)
+print("A mod B по алгоритму Баррета:")
+print(G)
+#Barret_T0_Hex
+print("A mod B по алгоритму Баррета в системе счисления Хекс:")
+print(To_Hex(G))
+
+#(A+B) mod N
+def Long_Add_Mod(A, B, N):
+    A = Func(A)
+    B = Func(B)
+    C = Long_Add(A, B, 32)
+    C = To_Hex(C)
+    D = Barret_Reduction(C, N)
+    return D
+
+F = Long_Add_Mod(A, B, N)
+print("(A + B) mod N: ")
+print(F)
+print("(A + B) mod N в системе счисления Хекс:")
+print(To_Hex(F))
+
+#(A - B) mod N
+def Long_Sub_Mod(A, B, N):
+    A = Func(A)
+    B = Func(B)
+    C = Long_Sub(A, B, 32)
+    C = To_Hex(C)
+    D = Barret_Reduction(C, N)
+    return D
+
+O = Long_Sub_Mod(A, B, N)
+print("(A - B) mod N: ")
+print(O)
+print("(A - B) mod N в системе счисления Хекс:")
+print(To_Hex(O))
+
+#(A*B) mod N 
+def Long_Mul_Mod(A, B, N):
+    A = Func(A)
+    B = Func(B)
+    C = Long_Mul(A, B)
+    C = To_Hex(C)
+    D = Barret_Reduction(C, N)
+    return D
+
+Z = Long_Sub_Mod(A, B, N)
+print("A*B mod N: ")
+print(Z)
+print(" A*B mod N в системе счисления Хекс:")
+print(To_Hex(Z))
+
+#(A^2) mod N
+def Long_Square_Mod(A, N):
+    A = Func(A)
+    C = Long_Square(A)
+    C = To_Hex(C)
+    D = Barret_Reduction(C, N)
+    return D
+
+X = Long_Square_Mod(A, N)
+print("A^2 mod N: ")
+print(X)
+print(" A^2 mod N в системе счисления Хекс:")
+print(To_Hex(X))
+
+#(A^B) mod N
+def Long_Power_Mod(A, B, N):
+    C = Long_Power(A, B)
+    C = To_Hex(C)
+    D = Barret_Reduction(C, N)
+    return D
+V = Long_Power_Mod(a1, b1, N)
+print("A^B mod N: ")
+print(V)
+print(" A^B mod N в системе счисления Хекс:")
+print(To_Hex(V))
+
+    
