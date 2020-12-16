@@ -1,1 +1,1 @@
-# Lab1_SROM
+# Lab1_2_SROM
